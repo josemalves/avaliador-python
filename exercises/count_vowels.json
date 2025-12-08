@@ -1,0 +1,13 @@
+{
+  "title": "Contar Vogais",
+  "description": "Crie a função count_vowels(s) que conta o número de vogais (a, e, i, o, u) numa string. Considere maiúsculas e minúsculas.",
+  "function": "count_vowels",
+  "tests": [
+    { "input": "hello", "output": 2 },
+    { "input": "PYTHON", "output": 1 },
+    { "input": "aeiou", "output": 5 },
+    { "input": "xyz", "output": 0 },
+    { "input": "Programacao", "output": 5 },
+    { "input": "", "output": 0 }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Capitalizar Palavras",
+  "description": "Crie a função capitalize_words(s) que retorna a string com a primeira letra de cada palavra em maiúscula.",
+  "function": "capitalize_words",
+  "tests": [
+    { "input": "hello world", "output": "Hello World" },
+    { "input": "python programming", "output": "Python Programming" },
+    { "input": "a", "output": "A" },
+    { "input": "", "output": "" },
+    { "input": "ALREADY CAPS", "output": "Already Caps" },
+    { "input": "one two three", "output": "One Two Three" }
+  ]
+}

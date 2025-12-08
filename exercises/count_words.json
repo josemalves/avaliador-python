@@ -1,0 +1,13 @@
+{
+  "title": "Contar Palavras",
+  "description": "Crie a função count_words(s) que conta o número de palavras numa string. Palavras são separadas por espaços.",
+  "function": "count_words",
+  "tests": [
+    { "input": "hello world", "output": 2 },
+    { "input": "python", "output": 1 },
+    { "input": "", "output": 0 },
+    { "input": "um dois tres quatro cinco", "output": 5 },
+    { "input": "   ", "output": 0, "hint": "Apenas espaços não contam como palavras" },
+    { "input": "  hello   world  ", "output": 2 }
+  ]
+}

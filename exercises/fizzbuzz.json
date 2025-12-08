@@ -1,0 +1,15 @@
+{
+  "title": "FizzBuzz",
+  "description": "Crie a função fizzbuzz(n) que retorna: 'FizzBuzz' se n for divisível por 3 e 5, 'Fizz' se for divisível só por 3, 'Buzz' se for divisível só por 5, ou o próprio número como string caso contrário.",
+  "function": "fizzbuzz",
+  "tests": [
+    { "input": 3, "output": "Fizz" },
+    { "input": 5, "output": "Buzz" },
+    { "input": 15, "output": "FizzBuzz" },
+    { "input": 1, "output": "1" },
+    { "input": 7, "output": "7" },
+    { "input": 9, "output": "Fizz" },
+    { "input": 10, "output": "Buzz" },
+    { "input": 30, "output": "FizzBuzz" }
+  ]
+}

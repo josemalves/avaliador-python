@@ -1,0 +1,13 @@
+{
+  "id": "Soma de 2 números",
+  "title": "Somar dois números",
+  "description": "Escreve uma função chamada soma(a, b) que recebe dois números e devolve a soma.",
+  "function": "soma",
+  "starter_code": "def sum_two(a, b):\n    # escreve aqui o teu código\n    pass",
+  "tests": [
+    { "input": [1, 2], "output": 3 },
+    { "input": [10, 5], "output": 15 },
+    { "input": [-3, 7], "output": 4 },
+    { "input": [0, 0], "output": 0 }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Ordenar Lista",
+  "description": "Crie a função sort_list(lst) que retorna uma nova lista ordenada em ordem crescente. Não use a função sorted() nem o método .sort().",
+  "function": "sort_list",
+  "tests": [
+    { "input": [[3, 1, 2]], "output": [1, 2, 3] },
+    { "input": [[5, 4, 3, 2, 1]], "output": [1, 2, 3, 4, 5] },
+    { "input": [[1]], "output": [1] },
+    { "input": [[]], "output": [] },
+    { "input": [[1, 1, 1]], "output": [1, 1, 1] },
+    { "input": [[-3, 0, 5, -1]], "output": [-3, -1, 0, 5] }
+  ]
+}

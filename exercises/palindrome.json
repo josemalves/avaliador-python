@@ -1,0 +1,14 @@
+{
+  "title": "Palíndromo",
+  "description": "Crie a função is_palindrome(s) que retorna True se a string s for um palíndromo (lê-se igual de trás para frente), False caso contrário. Ignore maiúsculas/minúsculas.",
+  "function": "is_palindrome",
+  "tests": [
+    { "input": "ana", "output": true },
+    { "input": "Ana", "output": true, "hint": "Deve ignorar maiúsculas/minúsculas" },
+    { "input": "roma", "output": false },
+    { "input": "radar", "output": true },
+    { "input": "Python", "output": false },
+    { "input": "Ovo", "output": true },
+    { "input": "", "output": true, "hint": "String vazia é palíndromo" }
+  ]
+}

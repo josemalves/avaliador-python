@@ -1,0 +1,13 @@
+{
+  "title": "Inverter String",
+  "description": "Crie a função reverse_string(s) que retorna a string s invertida.",
+  "function": "reverse_string",
+  "tests": [
+    { "input": "hello", "output": "olleh" },
+    { "input": "Python", "output": "nohtyP" },
+    { "input": "a", "output": "a" },
+    { "input": "", "output": "" },
+    { "input": "12345", "output": "54321" },
+    { "input": "Ana", "output": "anA" }
+  ]
+}

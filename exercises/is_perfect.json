@@ -1,0 +1,13 @@
+{
+  "title": "Número Perfeito",
+  "description": "Crie a função is_perfect(n) que retorna True se n for um número perfeito. Um número perfeito é igual à soma dos seus divisores próprios (excluindo ele mesmo). Ex: 6 = 1 + 2 + 3",
+  "function": "is_perfect",
+  "tests": [
+    { "input": 6, "output": true, "hint": "6 = 1 + 2 + 3" },
+    { "input": 28, "output": true, "hint": "28 = 1 + 2 + 4 + 7 + 14" },
+    { "input": 12, "output": false },
+    { "input": 1, "output": false },
+    { "input": 496, "output": true },
+    { "input": 100, "output": false }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Número Primo",
+  "description": "Crie a função is_prime(n) que retorna True se n for um número primo, False caso contrário. Um número primo é maior que 1 e só é divisível por 1 e por ele mesmo.",
+  "function": "is_prime",
+  "tests": [
+    { "input": 2, "output": true, "hint": "2 é o menor número primo" },
+    { "input": 3, "output": true },
+    { "input": 4, "output": false },
+    { "input": 17, "output": true },
+    { "input": 1, "output": false, "hint": "1 não é primo" },
+    { "input": 0, "output": false },
+    { "input": 97, "output": true },
+    { "input": 100, "output": false }
+  ]
+}

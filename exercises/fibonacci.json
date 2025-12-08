@@ -1,0 +1,13 @@
+{
+  "title": "Fibonacci",
+  "description": "Crie a função fibonacci(n) que retorna o n-ésimo número da sequência de Fibonacci. fibonacci(0)=0, fibonacci(1)=1, fibonacci(n)=fibonacci(n-1)+fibonacci(n-2)",
+  "function": "fibonacci",
+  "tests": [
+    { "input": 0, "output": 0, "hint": "O primeiro número de Fibonacci é 0" },
+    { "input": 1, "output": 1 },
+    { "input": 2, "output": 1 },
+    { "input": 5, "output": 5 },
+    { "input": 10, "output": 55 },
+    { "input": 15, "output": 610 }
+  ]
+}

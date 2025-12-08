@@ -1,0 +1,13 @@
+{
+  "title": "Soma de Lista",
+  "description": "Crie a função sum_list(lst) que retorna a soma de todos os elementos de uma lista de números. Não use a função sum() do Python.",
+  "function": "sum_list",
+  "tests": [
+    { "input": [[1, 2, 3]], "output": 6 },
+    { "input": [[10, 20, 30, 40]], "output": 100 },
+    { "input": [[-1, 1]], "output": 0 },
+    { "input": [[]], "output": 0, "hint": "Lista vazia deve retornar 0" },
+    { "input": [[5]], "output": 5 },
+    { "input": [[1, -2, 3, -4, 5]], "output": 3 }
+  ]
+}

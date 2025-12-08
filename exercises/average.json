@@ -1,0 +1,13 @@
+{
+  "title": "Média de Lista",
+  "description": "Crie a função average(lst) que retorna a média aritmética dos elementos de uma lista de números. Se a lista estiver vazia, retorne 0.",
+  "function": "average",
+  "tests": [
+    { "input": [[1, 2, 3]], "output": 2.0 },
+    { "input": [[10, 20]], "output": 15.0 },
+    { "input": [[5]], "output": 5.0 },
+    { "input": [[]], "output": 0, "hint": "Lista vazia retorna 0" },
+    { "input": [[1, 2, 3, 4, 5]], "output": 3.0 },
+    { "input": [[0, 0, 0]], "output": 0.0 }
+  ]
+}

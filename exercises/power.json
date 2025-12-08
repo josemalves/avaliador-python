@@ -1,0 +1,13 @@
+{
+  "title": "Potência",
+  "description": "Crie a função power(base, exp) que calcula base elevado a exp (base^exp). Não use o operador ** nem a função pow().",
+  "function": "power",
+  "tests": [
+    { "input": [2, 3], "output": 8 },
+    { "input": [5, 2], "output": 25 },
+    { "input": [3, 0], "output": 1, "hint": "Qualquer número elevado a 0 é 1" },
+    { "input": [10, 1], "output": 10 },
+    { "input": [2, 10], "output": 1024 },
+    { "input": [7, 3], "output": 343 }
+  ]
+}

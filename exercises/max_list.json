@@ -1,0 +1,13 @@
+{
+  "title": "Máximo de Lista",
+  "description": "Crie a função max_list(lst) que retorna o maior elemento de uma lista de números. Não use a função max() do Python.",
+  "function": "max_list",
+  "tests": [
+    { "input": [[1, 2, 3]], "output": 3 },
+    { "input": [[5, 1, 9, 3]], "output": 9 },
+    { "input": [[-1, -5, -2]], "output": -1, "hint": "Funciona também com negativos?" },
+    { "input": [[42]], "output": 42 },
+    { "input": [[10, 10, 10]], "output": 10 },
+    { "input": [[100, 0, -50, 75]], "output": 100 }
+  ]
+}
