@@ -1,37 +1,31 @@
-# 🐍 Avaliador Automático de Python
+# 🐍 Avaliador Automático de Python v2.0
 
 Aplicação web para avaliação automática de exercícios de programação Python.
+**Agora com sistema de utilizadores!**
 
 ## 🚀 Funcionalidades
 
 - ✅ **19 exercícios** de programação
-- 🔒 **Análise de segurança** - bloqueia código malicioso
-- 📝 **Verificação de estilo** - dicas de boas práticas
-- 🧪 **Testes automáticos** - feedback instantâneo
-- 📊 **Métricas de código** - complexidade, linhas, etc.
+- 🔒 **Sistema de Login/Registo**
+- 👨‍🏫 **Modo Professor** - Ver todos os alunos e submissões
+- 📊 **Estatísticas pessoais** - Média, exercícios feitos
+- 📜 **Histórico de submissões**
+- 🧪 **Testes automáticos**
+- 🔐 **Sandbox seguro**
 
-## 📚 Exercícios Disponíveis
+## 👤 Contas de Teste
 
-| Exercício | Função | Dificuldade |
-|-----------|--------|-------------|
-| Fatorial | `factorial(n)` | ⭐ |
-| Número par | `is_even(n)` | ⭐ |
-| Soma | `soma(a, b)` | ⭐ |
-| Fibonacci | `fibonacci(n)` | ⭐⭐ |
-| Palíndromo | `is_palindrome(s)` | ⭐⭐ |
-| Número Primo | `is_prime(n)` | ⭐⭐ |
-| FizzBuzz | `fizzbuzz(n)` | ⭐⭐ |
-| E mais... | | |
+| Username | Password | Tipo |
+|----------|----------|------|
+| professor | admin123 | Professor |
+| aluno1 | teste123 | Aluno |
 
 ## 🛠️ Tecnologias
 
 - Python 3.x
 - Streamlit
+- Supabase (PostgreSQL)
 
 ## 👥 Autores
 
 Projeto TEI - 2024/2025
-
-## 📄 Licença
-
-Projeto académico - Uso educacional
