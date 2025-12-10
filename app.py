@@ -710,7 +710,7 @@ def generate_pdf_report(report, username):
     if len(code.split('\n')) > 30:
         pdf.cell(0, 5, '... (código truncado)', ln=True)
     
-    return pdf.output(dest='S').encode('latin-1')
+    return bytes(pdf.output())
 
 
 def get_pdf_download_link(pdf_bytes, filename):
