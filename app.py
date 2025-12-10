@@ -326,24 +326,40 @@ def get_smart_hint(error_msg, actual_result, expected_result):
     hints = []
     
     if error_msg:
+        # Procurar tipo de erro específico
         for error_type, config in SMART_HINTS.items():
-            if error_type in error_msg:
+            if error_type in str(error_msg):
                 pattern = config.get("pattern", "")
                 match = ""
                 if pattern:
-                    m = re.search(pattern, error_msg)
+                    m = re.search(pattern, str(error_msg))
                     if m:
                         match = m.group(1) if m.groups() else ""
                 
                 for hint in config["hints"][:2]:
                     hints.append(hint.format(match=match))
                 break
+        
+        # Se não encontrou dicas específicas, dar dicas genéricas baseadas no erro
+        if not hints:
+            if 'not defined' in str(error_msg).lower():
+                hints.append("💡 Algo não está definido - verifica nomes de variáveis e funções")
+            elif 'indent' in str(error_msg).lower():
+                hints.append("💡 Problema de indentação - usa sempre 4 espaços")
+            elif 'syntax' in str(error_msg).lower():
+                hints.append("💡 Erro de sintaxe - verifica ':' após if/for/def e parênteses")
+            else:
+                hints.append("💡 Ocorreu um erro - lê a mensagem com atenção")
     
     elif actual_result is None and expected_result is not None:
         hints.extend(SMART_HINTS["no_return"]["hints"][:2])
     
     elif actual_result != expected_result:
         hints.extend(SMART_HINTS["wrong_result"]["hints"][:2])
+    
+    # Garantir que sempre retorna pelo menos uma dica
+    if not hints:
+        hints.append("💡 Revê a lógica do teu código e testa com o input dado")
     
     return hints
 
@@ -710,6 +726,7 @@ def generate_pdf_report(report, username):
     if len(code.split('\n')) > 30:
         pdf.cell(0, 5, '... (código truncado)', ln=True)
     
+    # fpdf2 retorna bytes diretamente
     return bytes(pdf.output())
 
 
@@ -976,16 +993,36 @@ def page_main():
                     else:
                         st.error(f"❌ Teste {test['test_number']}: Esperado `{test['expected']}`, obteve `{test['actual']}`")
                         
-                        # Dicas inteligentes
-                        if test.get('smart_hints'):
-                            for hint in test['smart_hints']:
-                                st.markdown(f'<div class="hint-box">{hint}</div>', unsafe_allow_html=True)
-                        elif test.get('hint'):
-                            st.info(f"💡 {test['hint']}")
-                        
+                        # Mostrar erro técnico se existir
                         if test.get('error'):
-                            with st.expander("Ver erro técnico"):
-                                st.code(test['error'])
+                            st.code(test['error'], language=None)
+                        
+                        # Dicas inteligentes - SEMPRE mostrar
+                        st.markdown("**💡 Dicas para resolver:**")
+                        if test.get('smart_hints') and len(test.get('smart_hints', [])) > 0:
+                            for hint in test['smart_hints']:
+                                st.warning(hint)
+                        elif test.get('hint'):
+                            st.warning(f"💡 {test['hint']}")
+                        else:
+                            # Dicas genéricas baseadas no resultado
+                            if test.get('actual') is None:
+                                st.warning("💡 A função retorna None - esqueceste do 'return'?")
+                                st.warning("💡 Verifica se a função está definida corretamente")
+                            elif test.get('error'):
+                                error_msg = test.get('error', '')
+                                if 'not defined' in error_msg:
+                                    st.warning("💡 Verifica se o nome da função está correto")
+                                    st.warning("💡 A função deve chamar-se exatamente como pedido")
+                                elif 'indent' in error_msg.lower():
+                                    st.warning("💡 Problema de indentação - usa 4 espaços")
+                                elif 'syntax' in error_msg.lower():
+                                    st.warning("💡 Erro de sintaxe - verifica os ':' e parênteses")
+                                else:
+                                    st.warning("💡 Lê o erro acima com atenção")
+                            else:
+                                st.warning("💡 O resultado está errado - revê a lógica")
+                                st.warning("💡 Testa manualmente com este input")
                 
                 # Análise estática
                 st.subheader("🔍 Análise do Código")
@@ -1058,13 +1095,103 @@ def page_main():
     
     # TABS PROFESSOR
     if is_professor:
-        # TAB 4 - ALUNOS
+        # TAB 4 - ALUNOS (com gráficos)
         with tabs[3]:
-            st.header("👥 Alunos")
+            st.header("👥 Dashboard de Alunos")
             users = db_get_all_users()
+            all_subs = db_get_all_submissions()
             
-            st.metric("Total de Utilizadores", len(users))
+            # Métricas gerais
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("👥 Total Utilizadores", len(users))
+            col2.metric("📝 Total Submissões", len(all_subs))
+            approved_count = sum(1 for s in all_subs if s.get('status') == 'approved')
+            col3.metric("✅ Aprovadas", approved_count)
+            if all_subs:
+                avg_score = sum(s.get('score', 0) for s in all_subs) / len(all_subs)
+                col4.metric("📊 Média Global", f"{avg_score:.1f}")
             
+            st.markdown("---")
+            
+            # Gráficos
+            st.subheader("📊 Estatísticas")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Gráfico de barras - notas por aluno
+                st.markdown("**Média por Aluno**")
+                alunos_data = []
+                for u in users:
+                    if u.get('role') == 'aluno':
+                        stats = db_get_user_stats(u.get('username'))
+                        if stats['total'] > 0:
+                            alunos_data.append({
+                                'Aluno': u.get('username'),
+                                'Média': stats['average'],
+                                'Submissões': stats['total']
+                            })
+                
+                if alunos_data:
+                    import pandas as pd
+                    df = pd.DataFrame(alunos_data)
+                    st.bar_chart(df.set_index('Aluno')['Média'])
+                else:
+                    st.info("Sem dados de alunos ainda")
+            
+            with col2:
+                # Gráfico circular - aprovados vs reprovados
+                st.markdown("**Taxa de Aprovação**")
+                if all_subs:
+                    approved = sum(1 for s in all_subs if s.get('status') == 'approved')
+                    failed = len(all_subs) - approved
+                    
+                    import pandas as pd
+                    df_pie = pd.DataFrame({
+                        'Status': ['Aprovados', 'Reprovados'],
+                        'Quantidade': [approved, failed]
+                    })
+                    st.bar_chart(df_pie.set_index('Status'))
+                    st.caption(f"✅ {approved} aprovados ({approved*100//len(all_subs) if all_subs else 0}%) | ❌ {failed} reprovados")
+                else:
+                    st.info("Sem submissões ainda")
+            
+            st.markdown("---")
+            
+            # Exercícios mais difíceis
+            st.subheader("📈 Exercícios por Dificuldade")
+            if all_subs:
+                exercise_stats = {}
+                for sub in all_subs:
+                    ex_id = sub.get('exercise_id', 'unknown')
+                    if ex_id not in exercise_stats:
+                        exercise_stats[ex_id] = {'total': 0, 'approved': 0, 'scores': []}
+                    exercise_stats[ex_id]['total'] += 1
+                    if sub.get('status') == 'approved':
+                        exercise_stats[ex_id]['approved'] += 1
+                    exercise_stats[ex_id]['scores'].append(sub.get('score', 0))
+                
+                # Ordenar por taxa de aprovação
+                exercise_list = []
+                for ex_id, stats in exercise_stats.items():
+                    avg = sum(stats['scores']) / len(stats['scores']) if stats['scores'] else 0
+                    rate = (stats['approved'] / stats['total'] * 100) if stats['total'] > 0 else 0
+                    exercise_list.append({
+                        'Exercício': ex_id,
+                        'Submissões': stats['total'],
+                        'Aprovados': stats['approved'],
+                        'Taxa Aprovação': f"{rate:.0f}%",
+                        'Média': f"{avg:.1f}"
+                    })
+                
+                import pandas as pd
+                df_ex = pd.DataFrame(exercise_list)
+                st.dataframe(df_ex, use_container_width=True)
+            
+            st.markdown("---")
+            
+            # Lista de alunos
+            st.subheader("👤 Detalhes por Aluno")
             for u in users:
                 role_badge = "👨‍🏫" if u.get('role') == 'professor' else "🎓"
                 user_stats = db_get_user_stats(u.get('username'))
@@ -1075,6 +1202,14 @@ def page_main():
                     col2.metric("Aprovadas", user_stats['approved'])
                     col3.metric("Média", user_stats['average'])
                     col4.metric("Exercícios", user_stats['exercises_done'])
+                    
+                    # Mini gráfico de evolução do aluno
+                    user_subs = db_get_user_submissions(u.get('username'))
+                    if user_subs and len(user_subs) > 1:
+                        st.markdown("**Evolução das notas:**")
+                        import pandas as pd
+                        scores = [s.get('score', 0) for s in reversed(user_subs[-10:])]
+                        st.line_chart(scores)
         
         # TAB 5 - SUBMISSÕES
         with tabs[4]:
