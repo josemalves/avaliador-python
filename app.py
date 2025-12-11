@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""
-Avaliador Automático de Programas Python
-Versão 3.0 - Completa
-- Sistema de utilizadores
-- Análise estática melhorada
-- Dicas inteligentes
-- Editor com syntax highlighting
-- Exportar PDF
-- Modo professor expandido
-"""
 
 import streamlit as st
 import json
@@ -19,10 +9,6 @@ import base64
 from datetime import datetime
 import requests
 from io import BytesIO
-
-# =============================================================================
-# CONFIGURAÇÃO SUPABASE
-# =============================================================================
 
 SUPABASE_URL = "https://jssnogllerzeezgeodxy.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impzc25vZ2xsZXJ6ZWV6Z2VvZHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMzU4NTksImV4cCI6MjA4MDgxMTg1OX0.6DAaTeFLkLNDOeZsjS93ee53z5wvncHKAFlY046Cw6s"
@@ -41,20 +27,12 @@ HEADERS_RETURN = {
     "Prefer": "return=representation"
 }
 
-# =============================================================================
-# CONFIGURAÇÃO DA PÁGINA
-# =============================================================================
-
 st.set_page_config(
     page_title="Avaliador Python v3.0",
     page_icon="🐍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# =============================================================================
-# CSS PERSONALIZADO
-# =============================================================================
 
 st.markdown("""
 <style>
@@ -144,9 +122,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# =============================================================================
-# FUNÇÕES SUPABASE
-# =============================================================================
 
 def db_login(username, password):
     url = f"{SUPABASE_URL}/rest/v1/users?username=eq.{username}&password=eq.{password}"
@@ -163,11 +138,9 @@ def db_register(username, password, role="aluno"):
     response = requests.get(url, headers=HEADERS)
     if response.status_code == 200 and response.json():
         return None, "Username já existe"
-    
     url = f"{SUPABASE_URL}/rest/v1/users"
     data = {"username": username, "password": password, "role": role}
     response = requests.post(url, headers=HEADERS_RETURN, json=data)
-    
     if response.status_code == 201:
         return True, "Conta criada com sucesso!"
     return None, "Erro ao criar conta"
@@ -218,19 +191,13 @@ def db_get_user_stats(username):
     submissions = db_get_user_submissions(username)
     if not submissions:
         return {"total": 0, "approved": 0, "average": 0, "exercises_done": 0}
-    
     total = len(submissions)
     approved = sum(1 for s in submissions if s.get('status') == 'approved')
     scores = [s.get('score', 0) for s in submissions if s.get('score') is not None]
     average = sum(scores) / len(scores) if scores else 0
     exercises_done = len(set(s.get('exercise_id') for s in submissions))
-    
     return {"total": total, "approved": approved, "average": round(average, 1), "exercises_done": exercises_done}
 
-
-# =============================================================================
-# DICAS INTELIGENTES
-# =============================================================================
 
 SMART_HINTS = {
     "NameError": {
@@ -322,11 +289,8 @@ SMART_HINTS = {
 
 
 def get_smart_hint(error_msg, actual_result, expected_result):
-    """Gera dicas inteligentes baseadas no erro."""
     hints = []
-    
     if error_msg:
-        # Procurar tipo de erro específico
         for error_type, config in SMART_HINTS.items():
             if error_type in str(error_msg):
                 pattern = config.get("pattern", "")
@@ -335,12 +299,9 @@ def get_smart_hint(error_msg, actual_result, expected_result):
                     m = re.search(pattern, str(error_msg))
                     if m:
                         match = m.group(1) if m.groups() else ""
-                
                 for hint in config["hints"][:2]:
                     hints.append(hint.format(match=match))
                 break
-        
-        # Se não encontrou dicas específicas, dar dicas genéricas baseadas no erro
         if not hints:
             if 'not defined' in str(error_msg).lower():
                 hints.append("💡 Algo não está definido - verifica nomes de variáveis e funções")
@@ -350,23 +311,14 @@ def get_smart_hint(error_msg, actual_result, expected_result):
                 hints.append("💡 Erro de sintaxe - verifica ':' após if/for/def e parênteses")
             else:
                 hints.append("💡 Ocorreu um erro - lê a mensagem com atenção")
-    
     elif actual_result is None and expected_result is not None:
         hints.extend(SMART_HINTS["no_return"]["hints"][:2])
-    
     elif actual_result != expected_result:
         hints.extend(SMART_HINTS["wrong_result"]["hints"][:2])
-    
-    # Garantir que sempre retorna pelo menos uma dica
     if not hints:
         hints.append("💡 Revê a lógica do teu código e testa com o input dado")
-    
     return hints
 
-
-# =============================================================================
-# ANÁLISE ESTÁTICA MELHORADA
-# =============================================================================
 
 FORBIDDEN_KEYWORDS = [
     (r'\bimport\s+os\b', "import os - acesso ao sistema operativo"),
@@ -395,7 +347,6 @@ SAFE_BUILTINS = {
 
 
 def analyze_security(code):
-    """Análise de segurança do código."""
     issues = []
     for pattern, description in FORBIDDEN_KEYWORDS:
         if re.search(pattern, code):
@@ -404,69 +355,40 @@ def analyze_security(code):
 
 
 def analyze_style(code):
-    """Análise de estilo do código."""
     issues = []
     lines = code.split('\n')
-    
     for i, line in enumerate(lines, 1):
-        # Linhas muito longas
         if len(line) > 100:
             issues.append({"line": i, "severity": "medium", "message": f"Linha {i} muito longa ({len(line)} caracteres, máximo recomendado: 100)"})
-        
-        # Tabs em vez de espaços
         if '\t' in line:
             issues.append({"line": i, "severity": "low", "message": f"Linha {i}: usar espaços em vez de tabs"})
-        
-        # Espaços no fim da linha
         if line != line.rstrip() and line.strip():
             issues.append({"line": i, "severity": "low", "message": f"Linha {i}: espaços em branco no final"})
-        
-        # Múltiplos espaços
         if '  ' in line and not line.strip().startswith('#'):
             issues.append({"line": i, "severity": "low", "message": f"Linha {i}: múltiplos espaços consecutivos"})
-    
     return issues[:15]
 
 
 def analyze_code_quality(code):
-    """Análise de qualidade do código."""
     issues = []
-    
-    # Encontrar variáveis definidas
-    defined_vars = set(re.findall(r'(\w+)\s*=', code))
-    
-    # Encontrar variáveis usadas
-    used_vars = set(re.findall(r'\b(\w+)\b', code)) - {'def', 'if', 'else', 'elif', 'for', 'while', 'return', 'and', 'or', 'not', 'in', 'True', 'False', 'None', 'pass', 'break', 'continue'}
-    
-    # Variáveis definidas mas não usadas (simplificado)
-    # Esta é uma análise básica, não 100% precisa
-    
-    # Funções muito longas
     functions = re.findall(r'def\s+\w+[^:]+:(.+?)(?=\ndef|\Z)', code, re.DOTALL)
     for i, func_body in enumerate(functions):
         lines_count = len([l for l in func_body.split('\n') if l.strip()])
         if lines_count > 20:
             issues.append({"severity": "medium", "message": f"Função com {lines_count} linhas - considere dividir em funções menores"})
-    
-    # Complexidade ciclomática básica
     complexity_keywords = len(re.findall(r'\b(if|elif|else|for|while|and|or|try|except)\b', code))
     if complexity_keywords > 10:
         issues.append({"severity": "medium", "message": f"Complexidade alta ({complexity_keywords} estruturas de controlo)"})
-    
-    # Nomes de variáveis muito curtos
     short_vars = re.findall(r'\b([a-z])\s*=', code)
     for var in set(short_vars):
         if var not in ['i', 'j', 'k', 'n', 'x', 'y']:
             issues.append({"severity": "low", "message": f"Variável '{var}' tem nome muito curto - use nomes descritivos"})
-    
     return issues[:10]
 
 
 def analyze_complexity(code):
-    """Métricas de complexidade."""
     lines = code.split('\n')
     code_lines = [l for l in lines if l.strip() and not l.strip().startswith('#')]
-    
     return {
         "lines_total": len(lines),
         "lines_of_code": len(code_lines),
@@ -481,7 +403,6 @@ def analyze_complexity(code):
 
 
 def full_static_analysis(code):
-    """Análise estática completa."""
     return {
         "security": analyze_security(code),
         "style": analyze_style(code),
@@ -489,10 +410,6 @@ def full_static_analysis(code):
         "complexity": analyze_complexity(code)
     }
 
-
-# =============================================================================
-# MOTOR DE AVALIAÇÃO
-# =============================================================================
 
 def get_exercises_dir():
     return os.path.join(os.path.dirname(__file__), 'exercises')
@@ -526,7 +443,6 @@ def load_exercise(ex_id):
 
 
 def save_exercise(ex_id, exercise_data):
-    """Guardar exercício (para modo professor)."""
     filepath = os.path.join(get_exercises_dir(), f"{ex_id}.json")
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(exercise_data, f, indent=2, ensure_ascii=False)
@@ -534,7 +450,6 @@ def save_exercise(ex_id, exercise_data):
 
 
 def delete_exercise(ex_id):
-    """Apagar exercício (para modo professor)."""
     filepath = os.path.join(get_exercises_dir(), f"{ex_id}.json")
     if os.path.exists(filepath):
         os.remove(filepath)
@@ -546,25 +461,19 @@ def execute_sandboxed(code, func_name, args, timeout_seconds=5):
     security_issues = analyze_security(code)
     if security_issues:
         return {"success": False, "error": "Código contém instruções não permitidas"}
-    
     sandbox_globals = {'__builtins__': SAFE_BUILTINS, '__name__': '__sandbox__'}
-    
     try:
         start_time = time.time()
         exec(code, sandbox_globals)
-        
         if func_name not in sandbox_globals:
             return {"success": False, "error": f"Função '{func_name}' não definida"}
-        
         func = sandbox_globals[func_name]
         if isinstance(args, list):
             result = func(*args)
         else:
             result = func(args)
-        
         elapsed = time.time() - start_time
         return {"success": True, "result": result, "time": elapsed}
-        
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
@@ -573,23 +482,17 @@ def run_tests(code, exercise):
     func_name = exercise.get("function")
     tests = exercise.get("tests", [])
     results = []
-    
     for i, test in enumerate(tests):
         test_input = test.get("input")
         expected = test.get("output")
         hint = test.get("hint", "")
-        
         execution = execute_sandboxed(code, func_name, test_input)
-        
         if execution["success"]:
             actual = execution["result"]
             passed = (actual == expected)
-            
-            # Gerar dicas inteligentes se falhou
             smart_hints = []
             if not passed:
                 smart_hints = get_smart_hint(None, actual, expected)
-            
             results.append({
                 "test_number": i + 1, "input": test_input, "expected": expected,
                 "actual": actual, "passed": passed, "time": execution.get("time", 0),
@@ -602,7 +505,6 @@ def run_tests(code, exercise):
                 "actual": None, "passed": False, "error": execution.get("error"),
                 "hint": hint, "smart_hints": smart_hints
             })
-    
     return results
 
 
@@ -610,17 +512,13 @@ def evaluate_submission(ex_id, code):
     exercise = load_exercise(ex_id)
     static = full_static_analysis(code)
     test_results = run_tests(code, exercise)
-    
     total_tests = len(test_results)
     passed_tests = sum(1 for t in test_results if t.get("passed"))
-    
     test_score = (passed_tests / total_tests * 80) if total_tests > 0 else 0
     security_penalty = len(static["security"]) * 20
     style_penalty = min(len(static["style"]), 5) * 2
     quality_penalty = min(len(static["quality"]), 3) * 2
-    
     final_score = max(0, test_score + 20 - security_penalty - style_penalty - quality_penalty)
-    
     return {
         "exercise_id": ex_id,
         "exercise_title": exercise.get("title"),
@@ -642,37 +540,25 @@ def evaluate_submission(ex_id, code):
     }
 
 
-# =============================================================================
-# GERAÇÃO DE PDF
-# =============================================================================
-
 def generate_pdf_report(report, username):
-    """Gera relatório PDF."""
     try:
         from fpdf import FPDF
     except ImportError:
         return None
-    
     pdf = FPDF()
     pdf.add_page()
-    
-    # Título
     pdf.set_font('Arial', 'B', 20)
-    pdf.cell(0, 15, 'Relatório de Avaliação', ln=True, align='C')
+    pdf.cell(0, 15, 'Relatorio de Avaliacao', ln=True, align='C')
     pdf.set_font('Arial', '', 12)
-    pdf.cell(0, 10, f'Avaliador Automático Python', ln=True, align='C')
+    pdf.cell(0, 10, f'Avaliador Automatico Python', ln=True, align='C')
     pdf.ln(10)
-    
-    # Info do aluno
     pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Informações', ln=True)
+    pdf.cell(0, 10, 'Informacoes', ln=True)
     pdf.set_font('Arial', '', 11)
     pdf.cell(0, 8, f'Aluno: {username}', ln=True)
-    pdf.cell(0, 8, f'Exercício: {report.get("exercise_title", report.get("exercise_id"))}', ln=True)
+    pdf.cell(0, 8, f'Exercicio: {report.get("exercise_title", report.get("exercise_id"))}', ln=True)
     pdf.cell(0, 8, f'Data: {report.get("timestamp", "")[:19].replace("T", " ")}', ln=True)
     pdf.ln(5)
-    
-    # Resultado
     evaluation = report.get('evaluation', {})
     pdf.set_font('Arial', 'B', 14)
     pdf.cell(0, 10, 'Resultado', ln=True)
@@ -680,65 +566,43 @@ def generate_pdf_report(report, username):
     status_text = 'APROVADO' if evaluation.get('status') == 'approved' else 'REPROVADO'
     pdf.cell(0, 10, f'Nota Final: {evaluation.get("final_score", 0)}/100 - {status_text}', ln=True)
     pdf.ln(5)
-    
-    # Testes
     pdf.set_font('Arial', 'B', 14)
     pdf.cell(0, 10, 'Resultados dos Testes', ln=True)
     pdf.set_font('Arial', '', 10)
-    
     summary = report.get('dynamic_analysis', {}).get('summary', {})
     pdf.cell(0, 8, f'Testes: {summary.get("passed", 0)}/{summary.get("total", 0)} corretos', ln=True)
-    
     for test in report.get('dynamic_analysis', {}).get('tests', []):
         status = '[OK]' if test.get('passed') else '[ERRO]'
         pdf.cell(0, 6, f'  {status} Teste {test.get("test_number")}: input={test.get("input")} esperado={test.get("expected")} obtido={test.get("actual")}', ln=True)
-    
     pdf.ln(5)
-    
-    # Análise Estática
     pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Análise Estática', ln=True)
+    pdf.cell(0, 10, 'Analise Estatica', ln=True)
     pdf.set_font('Arial', '', 10)
-    
     static = report.get('static_analysis', {})
     complexity = static.get('complexity', {})
-    
-    pdf.cell(0, 6, f'Linhas de código: {complexity.get("lines_of_code", 0)}', ln=True)
-    pdf.cell(0, 6, f'Funções: {complexity.get("num_functions", 0)}', ln=True)
+    pdf.cell(0, 6, f'Linhas de codigo: {complexity.get("lines_of_code", 0)}', ln=True)
+    pdf.cell(0, 6, f'Funcoes: {complexity.get("num_functions", 0)}', ln=True)
     pdf.cell(0, 6, f'Complexidade: {complexity.get("complexity_score", 0)}', ln=True)
-    
     if static.get('security'):
-        pdf.cell(0, 6, f'Problemas de segurança: {len(static.get("security", []))}', ln=True)
+        pdf.cell(0, 6, f'Problemas de seguranca: {len(static.get("security", []))}', ln=True)
     if static.get('style'):
         pdf.cell(0, 6, f'Problemas de estilo: {len(static.get("style", []))}', ln=True)
-    
     pdf.ln(10)
-    
-    # Código submetido
     pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Código Submetido', ln=True)
+    pdf.cell(0, 10, 'Codigo Submetido', ln=True)
     pdf.set_font('Courier', '', 9)
-    
     code = report.get('code', '')
     for line in code.split('\n')[:30]:
         pdf.cell(0, 5, line[:80], ln=True)
-    
     if len(code.split('\n')) > 30:
-        pdf.cell(0, 5, '... (código truncado)', ln=True)
-    
-    # fpdf2 retorna bytes diretamente
+        pdf.cell(0, 5, '... (codigo truncado)', ln=True)
     return bytes(pdf.output())
 
 
 def get_pdf_download_link(pdf_bytes, filename):
-    """Gera link de download para PDF."""
     b64 = base64.b64encode(pdf_bytes).decode()
     return f'<a href="data:application/pdf;base64,{b64}" download="{filename}">📄 Descarregar Relatório PDF</a>'
 
-
-# =============================================================================
-# GESTÃO DE SESSÃO
-# =============================================================================
 
 def init_session():
     if 'logged_in' not in st.session_state:
@@ -755,13 +619,7 @@ def logout():
     st.session_state.last_report = None
 
 
-# =============================================================================
-# COMPONENTE: EDITOR DE CÓDIGO
-# =============================================================================
-
 def code_editor(default_code, key="code"):
-    """Editor de código com syntax highlighting básico."""
-    # Tentar usar streamlit-ace se disponível
     try:
         from streamlit_ace import st_ace
         code = st_ace(
@@ -779,7 +637,6 @@ def code_editor(default_code, key="code"):
         )
         return code
     except ImportError:
-        # Fallback para textarea normal com estilo melhorado
         st.markdown("""
         <style>
         .stTextArea textarea {
@@ -794,26 +651,17 @@ def code_editor(default_code, key="code"):
         return st.text_area("💻 Código:", value=default_code, height=300, key=key)
 
 
-# =============================================================================
-# PÁGINAS
-# =============================================================================
-
 def page_login():
     st.markdown('<div class="main-header">🐍 Avaliador Automático Python v3.0</div>', unsafe_allow_html=True)
-    
     col1, col2, col3 = st.columns([1, 2, 1])
-    
     with col2:
         st.markdown("### 👤 Entrar na conta")
-        
         tab1, tab2 = st.tabs(["🔑 Login", "📝 Registar"])
-        
         with tab1:
             with st.form("login_form"):
                 username = st.text_input("Username")
                 password = st.text_input("Password", type="password")
                 submit = st.form_submit_button("Entrar", use_container_width=True)
-                
                 if submit:
                     if username and password:
                         user = db_login(username, password)
@@ -827,14 +675,12 @@ def page_login():
                             st.error("Username ou password incorretos")
                     else:
                         st.warning("Preenche todos os campos")
-        
         with tab2:
             with st.form("register_form"):
                 new_username = st.text_input("Username", key="reg_user")
                 new_password = st.text_input("Password", type="password", key="reg_pass")
                 confirm_password = st.text_input("Confirmar Password", type="password")
                 submit_reg = st.form_submit_button("Criar Conta", use_container_width=True)
-                
                 if submit_reg:
                     if new_username and new_password and confirm_password:
                         if new_password != confirm_password:
@@ -849,7 +695,6 @@ def page_login():
                                 st.error(msg)
                     else:
                         st.warning("Preenche todos os campos")
-        
         st.markdown("---")
         st.caption("🔐 Contas de teste: `professor`/`admin123` | `aluno1`/`teste123`")
 
@@ -857,94 +702,66 @@ def page_login():
 def page_main():
     user = st.session_state.user
     is_professor = user.get('role') == 'professor'
-    
-    # Sidebar
     with st.sidebar:
         st.markdown(f"### 👤 {user.get('username')}")
-        
         if is_professor:
             st.markdown('<span class="professor-badge">👨‍🏫 Professor</span>', unsafe_allow_html=True)
         else:
             st.markdown('<span class="user-badge">🎓 Aluno</span>', unsafe_allow_html=True)
-        
         st.markdown("---")
-        
         stats = db_get_user_stats(user.get('username'))
         st.markdown("### 📊 Estatísticas")
-        
         col1, col2 = st.columns(2)
         col1.metric("Submissões", stats['total'])
         col2.metric("Aprovadas", stats['approved'])
-        
         col1, col2 = st.columns(2)
         col1.metric("Média", f"{stats['average']}")
         col2.metric("Exercícios", stats['exercises_done'])
-        
         st.markdown("---")
-        
         if st.button("🚪 Sair", use_container_width=True):
             logout()
             st.rerun()
-    
-    # Header
     st.markdown('<div class="main-header">🐍 Avaliador Automático Python v3.0</div>', unsafe_allow_html=True)
-    
-    # Tabs
     if is_professor:
         tabs = st.tabs(["📝 Exercícios", "🚀 Avaliar", "📜 Histórico", "👥 Alunos", "📊 Submissões", "⚙️ Gerir Exercícios"])
     else:
         tabs = st.tabs(["📝 Exercícios", "🚀 Avaliar", "📜 Histórico"])
-    
-    # TAB 1 - EXERCÍCIOS
     with tabs[0]:
         st.header("📚 Exercícios Disponíveis")
         exercises = list_exercises()
-        
         col1, col2 = st.columns([3, 1])
         with col1:
             search = st.text_input("🔍 Pesquisar...", placeholder="Nome do exercício")
         with col2:
             st.metric("Total", len(exercises))
-        
         if search:
             exercises = [ex for ex in exercises if search.lower() in ex.get('title', '').lower() or search.lower() in ex['id'].lower()]
-        
         for ex in exercises:
             with st.expander(f"📌 {ex.get('title', ex['id'])} (`{ex['id']}`)"):
                 st.markdown(f"**Função:** `{ex.get('function', 'N/A')}()`")
                 st.markdown(f"**Descrição:** {ex.get('description', 'Sem descrição')}")
-                
                 tests = ex.get('tests', [])
                 if tests:
                     st.markdown(f"**Exemplos ({len(tests)} testes):**")
                     for test in tests[:3]:
                         st.code(f"{ex.get('function')}({test['input']}) → {test['output']}", language=None)
-    
-    # TAB 2 - AVALIAR
     with tabs[1]:
         st.header("🚀 Submeter Código")
         exercises = list_exercises()
-        
         if exercises:
             exercise_options = {f"{ex.get('title', ex['id'])}": ex['id'] for ex in exercises}
             selected_name = st.selectbox("📋 Exercício:", list(exercise_options.keys()))
             selected_id = exercise_options[selected_name]
-            
             exercise = load_exercise(selected_id)
-            
             col1, col2 = st.columns([3, 1])
             with col1:
                 st.info(f"**Função:** `{exercise.get('function')}()`\n\n{exercise.get('description', '')}")
             with col2:
                 st.metric("Testes", len(exercise.get('tests', [])))
-            
             default_code = f"""def {exercise.get('function', 'funcao')}(n):
-    # Escreve o teu código aqui
     pass
 """
-            
             code = code_editor(default_code, key="main_editor")
-            
             col1, col2, col3 = st.columns([1, 1, 2])
             with col1:
                 evaluate_btn = st.button("🚀 Avaliar", type="primary", use_container_width=True)
@@ -953,12 +770,10 @@ def page_main():
                     pdf_btn = st.button("📄 Exportar PDF", use_container_width=True)
                 else:
                     pdf_btn = False
-            
             if evaluate_btn and code.strip():
                 with st.spinner("A avaliar..."):
                     report = evaluate_submission(selected_id, code)
                     st.session_state.last_report = report
-                
                 db_save_submission(
                     user.get('id'), user.get('username'), selected_id,
                     exercise.get('title'), code, report['evaluation']['final_score'],
@@ -966,14 +781,10 @@ def page_main():
                     report['dynamic_analysis']['summary']['total'],
                     report['evaluation']['status']
                 )
-                
-                # RESULTADO
                 st.markdown("---")
                 st.header("📊 Resultado")
-                
                 evaluation = report['evaluation']
                 col1, col2, col3 = st.columns(3)
-                
                 with col1:
                     score_class = "score-approved" if evaluation['status'] == 'approved' else "score-failed"
                     st.markdown(f"<div class='{score_class}'>{evaluation['final_score']}/100</div>", unsafe_allow_html=True)
@@ -984,20 +795,14 @@ def page_main():
                         st.success("✅ APROVADO")
                     else:
                         st.error("❌ REPROVADO")
-                
-                # Testes com dicas inteligentes
                 st.subheader("🧪 Testes")
                 for test in report['dynamic_analysis']['tests']:
                     if test['passed']:
                         st.success(f"✅ Teste {test['test_number']}: `{exercise.get('function')}({test['input']})` → `{test['actual']}`")
                     else:
                         st.error(f"❌ Teste {test['test_number']}: Esperado `{test['expected']}`, obteve `{test['actual']}`")
-                        
-                        # Mostrar erro técnico se existir
                         if test.get('error'):
                             st.code(test['error'], language=None)
-                        
-                        # Dicas inteligentes - SEMPRE mostrar
                         st.markdown("**💡 Dicas para resolver:**")
                         if test.get('smart_hints') and len(test.get('smart_hints', [])) > 0:
                             for hint in test['smart_hints']:
@@ -1005,7 +810,6 @@ def page_main():
                         elif test.get('hint'):
                             st.warning(f"💡 {test['hint']}")
                         else:
-                            # Dicas genéricas baseadas no resultado
                             if test.get('actual') is None:
                                 st.warning("💡 A função retorna None - esqueceste do 'return'?")
                                 st.warning("💡 Verifica se a função está definida corretamente")
@@ -1023,11 +827,8 @@ def page_main():
                             else:
                                 st.warning("💡 O resultado está errado - revê a lógica")
                                 st.warning("💡 Testa manualmente com este input")
-                
-                # Análise estática
                 st.subheader("🔍 Análise do Código")
                 static = report['static_analysis']
-                
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     if static['security']:
@@ -1042,24 +843,19 @@ def page_main():
                 with col3:
                     complexity = static['complexity']
                     st.info(f"📊 {complexity['lines_of_code']} linhas")
-                
-                # Detalhes
                 with st.expander("📋 Ver detalhes da análise"):
                     if static['security']:
                         st.markdown("**Problemas de Segurança:**")
                         for issue in static['security']:
                             st.markdown(f'<div class="security-alert">{issue["message"]}</div>', unsafe_allow_html=True)
-                    
                     if static['style']:
                         st.markdown("**Avisos de Estilo:**")
                         for issue in static['style'][:5]:
                             st.markdown(f'<div class="style-warning">{issue["message"]}</div>', unsafe_allow_html=True)
-                    
                     if static['quality']:
                         st.markdown("**Sugestões de Qualidade:**")
                         for issue in static['quality']:
                             st.info(issue["message"])
-                    
                     st.markdown("**Métricas:**")
                     metrics = static['complexity']
                     mcol1, mcol2, mcol3, mcol4 = st.columns(4)
@@ -1067,20 +863,15 @@ def page_main():
                     mcol2.metric("Funções", metrics['num_functions'])
                     mcol3.metric("Loops", metrics['num_loops'])
                     mcol4.metric("Complexidade", metrics['complexity_score'])
-            
-            # Exportar PDF
             if pdf_btn and st.session_state.last_report:
                 pdf_bytes = generate_pdf_report(st.session_state.last_report, user.get('username'))
                 if pdf_bytes:
                     st.markdown(get_pdf_download_link(pdf_bytes, f"relatorio_{selected_id}.pdf"), unsafe_allow_html=True)
                 else:
                     st.warning("Instale fpdf2 para exportar PDF: `pip install fpdf2`")
-    
-    # TAB 3 - HISTÓRICO
     with tabs[2]:
         st.header("📜 Histórico")
         submissions = db_get_user_submissions(user.get('username'))
-        
         if not submissions:
             st.info("Ainda não tens submissões.")
         else:
@@ -1092,16 +883,11 @@ def page_main():
                     col2.metric("Testes", f"{sub.get('tests_passed')}/{sub.get('tests_total')}")
                     col3.metric("Status", "Aprovado" if sub.get('status') == 'approved' else "Reprovado")
                     st.code(sub.get('code', ''), language='python')
-    
-    # TABS PROFESSOR
     if is_professor:
-        # TAB 4 - ALUNOS (com gráficos)
         with tabs[3]:
             st.header("👥 Dashboard de Alunos")
             users = db_get_all_users()
             all_subs = db_get_all_submissions()
-            
-            # Métricas gerais
             col1, col2, col3, col4 = st.columns(4)
             col1.metric("👥 Total Utilizadores", len(users))
             col2.metric("📝 Total Submissões", len(all_subs))
@@ -1110,16 +896,10 @@ def page_main():
             if all_subs:
                 avg_score = sum(s.get('score', 0) for s in all_subs) / len(all_subs)
                 col4.metric("📊 Média Global", f"{avg_score:.1f}")
-            
             st.markdown("---")
-            
-            # Gráficos
             st.subheader("📊 Estatísticas")
-            
             col1, col2 = st.columns(2)
-            
             with col1:
-                # Gráfico de barras - notas por aluno
                 st.markdown("**Média por Aluno**")
                 alunos_data = []
                 for u in users:
@@ -1131,21 +911,17 @@ def page_main():
                                 'Média': stats['average'],
                                 'Submissões': stats['total']
                             })
-                
                 if alunos_data:
                     import pandas as pd
                     df = pd.DataFrame(alunos_data)
                     st.bar_chart(df.set_index('Aluno')['Média'])
                 else:
                     st.info("Sem dados de alunos ainda")
-            
             with col2:
-                # Gráfico circular - aprovados vs reprovados
                 st.markdown("**Taxa de Aprovação**")
                 if all_subs:
                     approved = sum(1 for s in all_subs if s.get('status') == 'approved')
                     failed = len(all_subs) - approved
-                    
                     import pandas as pd
                     df_pie = pd.DataFrame({
                         'Status': ['Aprovados', 'Reprovados'],
@@ -1155,10 +931,7 @@ def page_main():
                     st.caption(f"✅ {approved} aprovados ({approved*100//len(all_subs) if all_subs else 0}%) | ❌ {failed} reprovados")
                 else:
                     st.info("Sem submissões ainda")
-            
             st.markdown("---")
-            
-            # Exercícios mais difíceis
             st.subheader("📈 Exercícios por Dificuldade")
             if all_subs:
                 exercise_stats = {}
@@ -1170,8 +943,6 @@ def page_main():
                     if sub.get('status') == 'approved':
                         exercise_stats[ex_id]['approved'] += 1
                     exercise_stats[ex_id]['scores'].append(sub.get('score', 0))
-                
-                # Ordenar por taxa de aprovação
                 exercise_list = []
                 for ex_id, stats in exercise_stats.items():
                     avg = sum(stats['scores']) / len(stats['scores']) if stats['scores'] else 0
@@ -1183,71 +954,53 @@ def page_main():
                         'Taxa Aprovação': f"{rate:.0f}%",
                         'Média': f"{avg:.1f}"
                     })
-                
                 import pandas as pd
                 df_ex = pd.DataFrame(exercise_list)
                 st.dataframe(df_ex, use_container_width=True)
-            
             st.markdown("---")
-            
-            # Lista de alunos
             st.subheader("👤 Detalhes por Aluno")
             for u in users:
                 role_badge = "👨‍🏫" if u.get('role') == 'professor' else "🎓"
                 user_stats = db_get_user_stats(u.get('username'))
-                
                 with st.expander(f"{role_badge} {u.get('username')} ({u.get('role')})"):
                     col1, col2, col3, col4 = st.columns(4)
                     col1.metric("Submissões", user_stats['total'])
                     col2.metric("Aprovadas", user_stats['approved'])
                     col3.metric("Média", user_stats['average'])
                     col4.metric("Exercícios", user_stats['exercises_done'])
-                    
-                    # Mini gráfico de evolução do aluno
                     user_subs = db_get_user_submissions(u.get('username'))
                     if user_subs and len(user_subs) > 1:
                         st.markdown("**Evolução das notas:**")
                         import pandas as pd
                         scores = [s.get('score', 0) for s in reversed(user_subs[-10:])]
                         st.line_chart(scores)
-        
-        # TAB 5 - SUBMISSÕES
         with tabs[4]:
             st.header("📊 Todas as Submissões")
             all_subs = db_get_all_submissions()
-            
             col1, col2 = st.columns(2)
             with col1:
                 filter_user = st.text_input("Filtrar por aluno")
             with col2:
                 filter_ex = st.text_input("Filtrar por exercício")
-            
             filtered = all_subs
             if filter_user:
                 filtered = [s for s in filtered if filter_user.lower() in s.get('username', '').lower()]
             if filter_ex:
                 filtered = [s for s in filtered if filter_ex.lower() in s.get('exercise_id', '').lower()]
-            
             st.caption(f"{len(filtered)} submissões")
-            
             for sub in filtered[:30]:
                 status_icon = "✅" if sub.get('status') == 'approved' else "❌"
                 with st.expander(f"{status_icon} {sub.get('username')} - {sub.get('exercise_title')} - {sub.get('score')}/100"):
                     st.code(sub.get('code', ''), language='python')
-        
-        # TAB 6 - GERIR EXERCÍCIOS
         with tabs[5]:
             st.header("⚙️ Gerir Exercícios")
-            
             st.subheader("➕ Adicionar Novo Exercício")
-            
             with st.form("new_exercise"):
                 new_id = st.text_input("ID (sem espaços)", placeholder="ex: soma_lista")
                 new_title = st.text_input("Título", placeholder="Soma de Lista")
                 new_desc = st.text_area("Descrição", placeholder="Crie uma função que...")
                 new_func = st.text_input("Nome da Função", placeholder="soma_lista")
                 new_tests = st.text_area("Testes (JSON)", placeholder='[{"input": [1,2], "output": 3}]', height=100)
-                
                 if st.form_submit_button("💾 Guardar Exercício"):
                     if new_id and new_title and new_func and new_tests:
                         try:
@@ -1265,10 +1018,8 @@ def page_main():
                             st.error("Testes JSON inválido")
                     else:
                         st.warning("Preenche todos os campos obrigatórios")
-            
             st.markdown("---")
             st.subheader("📋 Exercícios Existentes")
-            
             exercises = list_exercises()
             for ex in exercises:
                 col1, col2 = st.columns([4, 1])
@@ -1281,13 +1032,8 @@ def page_main():
                         st.rerun()
 
 
-# =============================================================================
-# MAIN
-# =============================================================================
-
 def main():
     init_session()
-    
     if st.session_state.logged_in:
         page_main()
     else:
