@@ -284,6 +284,14 @@ SMART_HINTS = {
             "💡 Testa manualmente com o input dado para entender o problema.",
             "💡 Verifica os casos limite (0, 1, valores negativos, listas vazias)."
         ]
+    },
+    "TimeoutError": {
+        "pattern": r"",
+        "hints": [
+            "💡 Loop infinito detetado! O teu código nunca termina.",
+            "💡 Verifica as condições do while - a variável de controlo está a mudar?",
+            "💡 Verifica o caso base da recursão - está a ser atingido?"
+        ]
     }
 }
 
@@ -309,6 +317,9 @@ def get_smart_hint(error_msg, actual_result, expected_result):
                 hints.append("💡 Problema de indentação - usa sempre 4 espaços")
             elif 'syntax' in str(error_msg).lower():
                 hints.append("💡 Erro de sintaxe - verifica ':' após if/for/def e parênteses")
+            elif 'timeout' in str(error_msg).lower() or 'loop infinito' in str(error_msg).lower():
+                hints.append("💡 Loop infinito! Verifica a condição do while ou o caso base da recursão")
+                hints.append("💡 A variável de controlo está a ser atualizada dentro do loop?")
             else:
                 hints.append("💡 Ocorreu um erro - lê a mensagem com atenção")
     elif actual_result is None and expected_result is not None:
@@ -457,25 +468,56 @@ def delete_exercise(ex_id):
     return False
 
 
-def execute_sandboxed(code, func_name, args, timeout_seconds=5):
+def execute_sandboxed(code, func_name, args, timeout_seconds=3):
+    import concurrent.futures
+    import threading
+    
     security_issues = analyze_security(code)
     if security_issues:
         return {"success": False, "error": "Código contém instruções não permitidas"}
-    sandbox_globals = {'__builtins__': SAFE_BUILTINS, '__name__': '__sandbox__'}
-    try:
-        start_time = time.time()
-        exec(code, sandbox_globals)
-        if func_name not in sandbox_globals:
-            return {"success": False, "error": f"Função '{func_name}' não definida"}
-        func = sandbox_globals[func_name]
-        if isinstance(args, list):
-            result = func(*args)
-        else:
-            result = func(args)
-        elapsed = time.time() - start_time
-        return {"success": True, "result": result, "time": elapsed}
-    except Exception as e:
-        return {"success": False, "error": str(e), "error_type": type(e).__name__}
+    
+    result_container = {"result": None, "error": None, "success": False}
+    
+    def run_code():
+        sandbox_globals = {'__builtins__': SAFE_BUILTINS, '__name__': '__sandbox__'}
+        try:
+            exec(code, sandbox_globals)
+            if func_name not in sandbox_globals:
+                result_container["error"] = f"Função '{func_name}' não definida"
+                return
+            func = sandbox_globals[func_name]
+            if isinstance(args, list):
+                result_container["result"] = func(*args)
+            else:
+                result_container["result"] = func(args)
+            result_container["success"] = True
+        except Exception as e:
+            result_container["error"] = str(e)
+            result_container["error_type"] = type(e).__name__
+    
+    start_time = time.time()
+    thread = threading.Thread(target=run_code)
+    thread.daemon = True
+    thread.start()
+    thread.join(timeout=timeout_seconds)
+    
+    elapsed = time.time() - start_time
+    
+    if thread.is_alive():
+        return {
+            "success": False, 
+            "error": f"⏱️ Timeout! O código demorou mais de {timeout_seconds} segundos. Possível loop infinito.",
+            "error_type": "TimeoutError"
+        }
+    
+    if result_container["success"]:
+        return {"success": True, "result": result_container["result"], "time": elapsed}
+    else:
+        return {
+            "success": False, 
+            "error": result_container.get("error", "Erro desconhecido"),
+            "error_type": result_container.get("error_type", "Error")
+        }
 
 
 def run_tests(code, exercise):
