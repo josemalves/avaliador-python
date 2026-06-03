@@ -10,8 +10,8 @@ from datetime import datetime
 import requests
 from io import BytesIO
 
-SUPABASE_URL = "https://jssnogllerzeezgeodxy.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impzc25vZ2xsZXJ6ZWV6Z2VvZHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMzU4NTksImV4cCI6MjA4MDgxMTg1OX0.6DAaTeFLkLNDOeZsjS93ee53z5wvncHKAFlY046Cw6s"
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
