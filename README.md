@@ -1,77 +1,99 @@
-# 🐍 Avaliador Automático de Python v3.0
+# Python Exercise Auto-Grader
 
-Aplicação web completa para avaliação automática de exercícios de programação Python.
+A web application for automated grading of Python programming exercises.
+Built for educational use, it gives students immediate feedback on
+correctness, code quality and security, and provides instructors with
+tools to manage exercises and track student progress.
 
-## ✨ Funcionalidades
+**Live demo:** https://avaliador-python.streamlit.app/
 
-### 🔐 Sistema de Utilizadores
-- Login e registo de alunos
-- Perfis de aluno e professor
-- Histórico pessoal de submissões
-- Estatísticas individuais
+> This is a public demo of an educational project. The hosted instance
+> uses shared test accounts and a shared database — do not submit
+> sensitive code or use real credentials.
 
-### 🔍 Análise Estática Melhorada
-- Verificação de segurança (bloqueio de código perigoso)
-- Análise de estilo (PEP8)
-- Métricas de complexidade
-- Sugestões de qualidade de código
+## Demo Accounts
 
-### 💡 Dicas Inteligentes
-- Feedback personalizado baseado no tipo de erro
-- Sugestões específicas para erros comuns
-- Hints para ajudar a resolver problemas
+| Role       | Username  | Password |
+|------------|-----------|----------|
+| Instructor | professor | admin123 |
+| Student    | aluno1    | teste123 |
 
-### 💻 Editor de Código Melhorado
-- Syntax highlighting
-- Numeração de linhas
-- Tema escuro profissional
+## Features
 
-### 📄 Exportar PDF
-- Relatórios completos em PDF
-- Inclui código, testes e análise
+**For students**
+- Browse and submit solutions to 19 Python exercises
+- Sandboxed execution with timeout protection
+- Immediate feedback: test results, contextual error hints, style and
+  security warnings
+- Personal submission history and statistics
+- Per-submission PDF report export
 
-### 👨‍🏫 Modo Professor Expandido
-- Ver todos os alunos e estatísticas
-- Ver todas as submissões
-- Adicionar novos exercícios pela interface
-- Apagar exercícios
+**For instructors**
+- Class-wide dashboard with per-student progress
+- View and filter all submissions by student or exercise
+- Add new exercises through the interface
 
-## 👤 Contas de Teste
+## Tech Stack
 
-| Username | Password | Tipo |
-|----------|----------|------|
-| professor | admin123 | 👨‍🏫 Professor |
-| aluno1 | teste123 | 🎓 Aluno |
+- **Application:** Python 3, Streamlit
+- **Editor:** streamlit-ace
+- **Database:** Supabase (PostgreSQL)
+- **PDF generation:** fpdf2
+- **Hosting:** Streamlit Community Cloud
 
-## 📚 19 Exercícios Disponíveis
+## Local Setup
 
-- Fatorial, Fibonacci, FizzBuzz
-- Número primo, Número perfeito
-- Palíndromo, Inverter string
-- Contar vogais, Contar palavras
-- Soma, Média, Máximo de lista
-- Ordenar lista, Remover duplicados
-- MDC, Potência
-- E mais...
-
-## 🛠️ Tecnologias
-
-- **Frontend:** Streamlit, Streamlit-Ace
-- **Backend:** Python 3.x
-- **Base de Dados:** Supabase (PostgreSQL)
-- **PDF:** FPDF2
-
-## 🚀 Como Executar Localmente
+Requires Python 3.10 or newer.
 
 ```bash
+git clone https://github.com/josemalves/avaliador-python.git
+cd avaliador-python
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## 👥 Autores
+Supabase credentials are read from `.streamlit/secrets.toml`:
 
-Projeto TEI - 2024/2025
+```toml
+SUPABASE_URL = "https://your-project.supabase.co"
+SUPABASE_KEY = "your-anon-key"
+```
 
-## 📄 Licença
+## Project Structure
 
-Projeto académico - Uso educacional
+```
+avaliador-python/
+├── app.py            # Main Streamlit application
+├── exercises/        # One JSON file per exercise
+├── requirements.txt
+└── .streamlit/
+    └── config.toml
+```
+
+## Adding Exercises
+
+Each exercise is a JSON file under `exercises/`:
+
+```json
+{
+  "title": "Exercise Title",
+  "description": "What the function should do.",
+  "function": "function_name",
+  "tests": [
+    { "input": [1, 2], "output": 3 },
+    { "input": [4, 5], "output": 9 }
+  ]
+}
+```
+
+## Status
+
+Educational demo. Not intended for production use with untrusted users.
+
+## License
+
+Released under the MIT License — see [LICENSE](LICENSE).
+
+## Author
+
+José Alves
